@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #6ba2d8;
+            font-family: 'Arial', sans-serif;
+        }
+        .jumbotron {
+            
+            color: black;
+            border-radius: 0.25rem;
+        }
+      
+        
+        .card {
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        
+            
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        .card-body {
+            background-color: #032a50;
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            height: 200px;
+        }
+        .card-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        .btn-outline-danger {
+            color: black;
+            border-color: #dc3545;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+
+        }
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+
+        }
+        .btn-warning, .btn-success {
+            margin-right: 10px;
+            border-radius: 5px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            margin-left:35px;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        .btn-warning:hover, .btn-success:hover {
+            transform: scale(1.05);
+            transition: transform 0.2s ease-in-out;
+        }
+        .form-floating input {
+            border-radius: 5px;
+            box-shadow: none;
+        }
+        .form-floating button {
+            border-radius: 5px;
+            box-shadow: none;
+        }
+        .jumbotron-heading {
+            font-size: 1.5rem;
+        }
+        .container {
+            max-width: 1200px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Dashboard Header -->
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Welcome to Your Dashboard</h1>
+
+        <!-- Course Search Box -->
+        <section class="jumbotron text-center">
+            <div class="container">
+                <h4 class="jumbotron-heading">Enter The Name of the Course for Recommendations</h4>
+                <div class="form-floating my-4">
+                    <form action="/dashboard" method="POST">
+                        <div class="mb-3">
+                            <input name="course" type="text" class="form-control" id="course" placeholder="Search for a course">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Recommend</button>
+                    </form>
+                </div>
+                {% if showtitle %}
+                    <h4 class="jumbotron-heading">Recommendations for Course <span style="color: red; font-size:1.5rem;">"{{ coursename }}"</span> are shown below</h4>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Course Recommendation Section -->
+        <div class="album py-5">
+            <div class="container">
+                {% if showerror %}
+                    <div class="card text-center mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Sorry, Course Not Available</h5>
+                            <p class="card-text">The course for "{{ coursename }}" is not available at the moment. We’ll report it to the Course Administrator.</p>
+                            <a href="/" class="btn btn-primary">Go to Home Page</a>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="row">
+                    {% for course in coursemap %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    <p class="card-text">{{ course }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a href="{{ coursemap[course] }}" target="_blank" class="btn btn-outline-danger">View Course</a>
+                                        <div>
+                                            <button onclick="updateProgress({{ course.course_id }}, 'In Progress')" class="btn btn-warning">Start Course</button>
+                                            <button onclick="updateProgress({{ course.course_id }}, 'Completed')" class="btn btn-success">Mark as Completed</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript for Updating Progress -->
+    <script>
+        function updateProgress(courseId, status) {
+            fetch(`/progress/${courseId}/${status}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                location.reload();  // Refresh the page to show updated progress
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
